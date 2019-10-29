@@ -9,6 +9,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TensorFlowNET.Examples", "s
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TensorFlowNET.Benchmark", "src\TensorFlowNet.Benchmarks\TensorFlowNET.Benchmark.csproj", "{7AB8328B-D245-4A1F-A537-C9D3EA4884B3}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TensorFlowNET.Hub", "..\..\TensorFlow.NET\src\TensorFlowNET.Hub\TensorFlowNET.Hub.csproj", "{1618C384-1A6A-49F6-A7F2-1849E4A9406A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TensorFlowNET.Models", "..\..\TensorFlow.NET\src\TensorFlowNET.Models\TensorFlowNET.Models.csproj", "{50AD3567-74DF-48DA-A2BD-3CF1C65B519A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TensorFlowNET.Core", "..\..\TensorFlow.NET\src\TensorFlowNET.Core\TensorFlowNET.Core.csproj", "{F574BA66-355B-4CA9-9906-62A6F8623018}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +33,18 @@ Global
 		{7AB8328B-D245-4A1F-A537-C9D3EA4884B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7AB8328B-D245-4A1F-A537-C9D3EA4884B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7AB8328B-D245-4A1F-A537-C9D3EA4884B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1618C384-1A6A-49F6-A7F2-1849E4A9406A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1618C384-1A6A-49F6-A7F2-1849E4A9406A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1618C384-1A6A-49F6-A7F2-1849E4A9406A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1618C384-1A6A-49F6-A7F2-1849E4A9406A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50AD3567-74DF-48DA-A2BD-3CF1C65B519A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50AD3567-74DF-48DA-A2BD-3CF1C65B519A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50AD3567-74DF-48DA-A2BD-3CF1C65B519A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50AD3567-74DF-48DA-A2BD-3CF1C65B519A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F574BA66-355B-4CA9-9906-62A6F8623018}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F574BA66-355B-4CA9-9906-62A6F8623018}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F574BA66-355B-4CA9-9906-62A6F8623018}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F574BA66-355B-4CA9-9906-62A6F8623018}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

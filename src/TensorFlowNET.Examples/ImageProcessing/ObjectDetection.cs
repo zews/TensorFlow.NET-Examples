@@ -34,11 +34,18 @@ namespace TensorFlowNET.Examples
 
         public float MIN_SCORE = 0.5f;
 
-        string modelDir = "ssd_mobilenet_v1_coco_2018_01_28";
+        //string modelUrl = "http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2018_01_28.tar.gz";
+        //string modelDir = "ssd_mobilenet_v1_coco_2018_01_28";
+
+        string modelUrl = "http://download.tensorflow.org/models/object_detection/faster_rcnn_inception_resnet_v2_atrous_coco_2018_01_28.tar.gz";
+        string modelDir = "faster_rcnn_inception_resnet_v2_atrous_coco_2018_01_28";
+
+
         string imageDir = "images";
         string pbFile = "frozen_inference_graph.pb";
         string labelFile = "mscoco_label_map.pbtxt";
         string picFile = "input.jpg";
+        string outPicFile = "output_3.jpg";
 
         NDArray imgArr;
 
@@ -83,19 +90,27 @@ namespace TensorFlowNET.Examples
 
         public void PrepareData()
         {
-            // get model file
-            string url = "http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2018_01_28.tar.gz";
-            Web.Download(url, modelDir, "ssd_mobilenet_v1_coco.tar.gz");
+            string fullPbPath = Path.Join(modelDir, pbFile);
+            if (File.Exists(fullPbPath))
+            {
+                Console.WriteLine($"{pbFile} already exists.");
+            }
+            else
+            {
+                // get model file
+                string url = modelUrl; //"http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2018_01_28.tar.gz";
+                Web.Download(url, modelDir, $"{modelDir}.tar.gz"); //"ssd_mobilenet_v1_coco.tar.gz");
 
-            Compress.ExtractTGZ(Path.Join(modelDir, "ssd_mobilenet_v1_coco.tar.gz"), "./");
+                Compress.ExtractTGZ(Path.Join(modelDir, $"{modelDir}.tar.gz"), "./"); //"ssd_mobilenet_v1_coco.tar.gz"), "./");
+            }
 
             // download sample picture
-            url = $"https://github.com/tensorflow/models/raw/master/research/object_detection/test_images/image2.jpg";
-            Web.Download(url, imageDir, "input.jpg");
+            string url2 = $"https://github.com/tensorflow/models/raw/master/research/object_detection/test_images/image2.jpg";
+            Web.Download(url2, imageDir, "input.jpg");
 
             // download the pbtxt file
-            url = $"https://raw.githubusercontent.com/tensorflow/models/master/research/object_detection/data/mscoco_label_map.pbtxt";
-            Web.Download(url, modelDir, "mscoco_label_map.pbtxt");
+            url2 = $"https://raw.githubusercontent.com/tensorflow/models/master/research/object_detection/data/mscoco_label_map.pbtxt";
+            Web.Download(url2, modelDir, "mscoco_label_map.pbtxt");
         }
 
         private NDArray ReadTensorFromImageFile(string file_name)
@@ -146,7 +161,7 @@ namespace TensorFlowNET.Examples
                 }
             }
 
-            string path = Path.Join(imageDir, "output.jpg");
+            string path = Path.Join(imageDir, $"{outPicFile}");
             bitmap.Save(path);
             Console.WriteLine($"Processed image is saved as {path}");
         }
