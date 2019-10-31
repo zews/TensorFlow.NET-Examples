@@ -23,6 +23,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using static Tensorflow.Binding;
+using System.Collections.Generic;
 
 namespace TensorFlowNET.Examples
 {
@@ -45,7 +46,7 @@ namespace TensorFlowNET.Examples
         string pbFile = "frozen_inference_graph.pb";
         string labelFile = "mscoco_label_map.pbtxt";
         string picFile = "input.jpg";
-        string outPicFile = "output_3.jpg";
+        string outPicFile = "output_9.jpg";
 
         NDArray imgArr;
 
@@ -53,13 +54,20 @@ namespace TensorFlowNET.Examples
         {
             PrepareData();
 
+            Console.WriteLine($"-> ReadTensorFromImageFile at time: {DateTime.Now.ToString("yyyy.MM.dd HH:mm:ss.ffff")}");
             // read in the input image
             imgArr = ReadTensorFromImageFile(Path.Join(imageDir, "input.jpg"));
 
+            Console.WriteLine($"-> ImportGraph at time: {DateTime.Now.ToString("yyyy.MM.dd HH:mm:ss.ffff")}");
             var graph = IsImportingGraph ? ImportGraph() : BuildGraph();
 
+            Console.WriteLine($"-> Using Session at time: {DateTime.Now.ToString("yyyy.MM.dd HH:mm:ss.ffff")}");
             using (var sess = tf.Session(graph))
+            {
+                Console.WriteLine($"-> Predict at time: {DateTime.Now.ToString("yyyy.MM.dd HH:mm:ss.ffff")}");
                 Predict(sess);
+            }
+            Console.WriteLine($"-> All done at time: {DateTime.Now.ToString("yyyy.MM.dd HH:mm:ss.ffff")}");
 
             return true;
         }
@@ -83,8 +91,10 @@ namespace TensorFlowNET.Examples
             Tensor imgTensor = graph.OperationByName("image_tensor");
             Tensor[] outTensorArr = new Tensor[] { tensorNum, tensorBoxes, tensorScores, tensorClasses };
 
+            Console.WriteLine($"-> Predict: run... at time: {DateTime.Now.ToString("yyyy.MM.dd HH:mm:ss.ffff")}");
             var results = sess.run(outTensorArr, new FeedItem(imgTensor, imgArr));
 
+            Console.WriteLine($"-> Predict: buildOutputImage at time: {DateTime.Now.ToString("yyyy.MM.dd HH:mm:ss.ffff")}");
             buildOutputImage(results);
         }
 
@@ -126,6 +136,14 @@ namespace TensorFlowNET.Examples
                 return sess.run(dims_expander);
         }
 
+        class tmp_res
+        {
+            public string Name { get; set; }
+            public Rectangle Rect { get; set; }
+            public float Score { get; set; }
+
+        }
+
         private void buildOutputImage(NDArray[] resultArr)
         {
             // get pbtxt items
@@ -133,6 +151,8 @@ namespace TensorFlowNET.Examples
 
             // get bitmap
             Bitmap bitmap = new Bitmap(Path.Join(imageDir, "input.jpg"));
+
+            List<tmp_res> scoreResults = new List<tmp_res>();
 
             var scores = resultArr[2].AsIterator<float>();
             var boxes = resultArr[1].GetData<float>();
@@ -157,8 +177,40 @@ namespace TensorFlowNET.Examples
 
                     string name = pbTxtItems.items.Where(w => w.id == id[i]).Select(s=>s.display_name).FirstOrDefault();
 
+                    scoreResults.Add(new tmp_res() { Name = name, Rect = rect, Score = score });
                     drawObjectOnBitmap(bitmap, rect, score, name);
                 }
+            }
+
+            try
+            {
+                var fs = File.Open(Path.Join(imageDir, $"{outPicFile}.txt"), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
+
+                string toWriteInit = $"New results. {DateTime.Now.ToString("yyyy.MM.dd HH:mm:ss.ffff")} {Environment.NewLine}";
+                byte[] toWriteBytesInit = System.Text.Encoding.ASCII.GetBytes(toWriteInit);
+                fs.Write(toWriteBytesInit, 0, toWriteBytesInit.Length);
+
+                if (scoreResults != null && scoreResults.Count > 0)
+                {
+                    scoreResults = scoreResults.OrderBy(o => o.Rect.X).ThenBy(o => o.Rect.Y).ToList();
+                    for(int i = 0; i < scoreResults.Count; i++)
+                    {
+                        tmp_res itemR = scoreResults[i];
+                        if(itemR != null)
+                        {
+                            string toWrite = $"i: {i}, Name:{itemR.Name}, Rect.X: {itemR.Rect.X}, Rect.Y: {itemR.Rect.Y}, Rect.Width: {itemR.Rect.Width}, Rect.Height: {itemR.Rect.Height}, Score: {itemR.Score} {Environment.NewLine}";
+                            byte[] toWriteBytes = System.Text.Encoding.ASCII.GetBytes(toWrite);
+                            fs.Write(toWriteBytes, 0, toWriteBytes.Length);
+                        }
+                    }
+                }
+
+                fs.Flush();
+                fs.Close();
+            }
+            catch (Exception ex)
+            {
+
             }
 
             string path = Path.Join(imageDir, $"{outPicFile}");
