@@ -46,7 +46,7 @@ namespace TensorFlowNET.Examples
         string pbFile = "frozen_inference_graph.pb";
         string labelFile = "mscoco_label_map.pbtxt";
         string picFile = "input.jpg";
-        string outPicFile = "output_9.jpg";
+        string outPicFile = "output_10.jpg";
 
         NDArray imgArr;
 
@@ -62,7 +62,19 @@ namespace TensorFlowNET.Examples
             var graph = IsImportingGraph ? ImportGraph() : BuildGraph();
 
             Console.WriteLine($"-> Using Session at time: {DateTime.Now.ToString("yyyy.MM.dd HH:mm:ss.ffff")}");
-            using (var sess = tf.Session(graph))
+            var configProto = new ConfigProto()
+            {
+                //InterOpParallelismThreads = 4,
+                AllowSoftPlacement = true,
+                LogDevicePlacement = true,
+                GpuOptions = new GPUOptions
+                {
+                    AllowGrowth = false,
+                    PerProcessGpuMemoryFraction = 0.5,
+                },
+            };
+            configProto.DeviceCount.Add("GPU", 1);
+            using (var sess = tf.Session(graph, configProto))
             {
                 Console.WriteLine($"-> Predict at time: {DateTime.Now.ToString("yyyy.MM.dd HH:mm:ss.ffff")}");
                 Predict(sess);
@@ -132,6 +144,19 @@ namespace TensorFlowNET.Examples
             var casted = tf.cast(decodeJpeg, TF_DataType.TF_UINT8);
             var dims_expander = tf.expand_dims(casted, 0);
 
+
+            var configProto = new ConfigProto()
+            {
+                //InterOpParallelismThreads = 4,
+                AllowSoftPlacement = true,
+                //LogDevicePlacement = true,
+                GpuOptions = new GPUOptions
+                {
+                    AllowGrowth = false,
+                    PerProcessGpuMemoryFraction = 0.5,
+                },
+            };
+            configProto.DeviceCount.Add("GPU", 1);
             using (var sess = tf.Session(graph))
                 return sess.run(dims_expander);
         }
@@ -157,7 +182,7 @@ namespace TensorFlowNET.Examples
             var scores = resultArr[2].AsIterator<float>();
             var boxes = resultArr[1].GetData<float>();
             var id = np.squeeze(resultArr[3]).GetData<float>();
-            for (int i=0; i< scores.size; i++)
+            for (int i = 0; i < scores.size; i++)
             {
                 float score = scores.MoveNext();
                 if (score > MIN_SCORE)
@@ -175,7 +200,7 @@ namespace TensorFlowNET.Examples
                         Height = (int)(bottom - top)
                     };
 
-                    string name = pbTxtItems.items.Where(w => w.id == id[i]).Select(s=>s.display_name).FirstOrDefault();
+                    string name = pbTxtItems.items.Where(w => w.id == id[i]).Select(s => s.display_name).FirstOrDefault();
 
                     scoreResults.Add(new tmp_res() { Name = name, Rect = rect, Score = score });
                     drawObjectOnBitmap(bitmap, rect, score, name);
@@ -193,10 +218,10 @@ namespace TensorFlowNET.Examples
                 if (scoreResults != null && scoreResults.Count > 0)
                 {
                     scoreResults = scoreResults.OrderBy(o => o.Rect.X).ThenBy(o => o.Rect.Y).ToList();
-                    for(int i = 0; i < scoreResults.Count; i++)
+                    for (int i = 0; i < scoreResults.Count; i++)
                     {
                         tmp_res itemR = scoreResults[i];
-                        if(itemR != null)
+                        if (itemR != null)
                         {
                             string toWrite = $"i: {i}, Name:{itemR.Name}, Rect.X: {itemR.Rect.X}, Rect.Y: {itemR.Rect.Y}, Rect.Width: {itemR.Rect.Width}, Rect.Height: {itemR.Rect.Height}, Score: {itemR.Score} {Environment.NewLine}";
                             byte[] toWriteBytes = System.Text.Encoding.ASCII.GetBytes(toWrite);
@@ -223,7 +248,7 @@ namespace TensorFlowNET.Examples
             using (Graphics graphic = Graphics.FromImage(bmp))
             {
                 graphic.SmoothingMode = SmoothingMode.AntiAlias;
-                
+
                 using (Pen pen = new Pen(Color.Red, 2))
                 {
                     graphic.DrawRectangle(pen, rect);
